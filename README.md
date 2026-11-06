@@ -59,6 +59,7 @@ Old tablet batteries: if the case bulges or the battery is swollen, do not leave
 | Weather | Open-Meteo | Current conditions plus a 4-day outlook over a drawn skyline. The sky follows sunrise, sunset and the weather. Auto picks a city or small-town skyline from the place's population. Free, no key |
 | Scores  | ESPN public scoreboard JSON | NFL, college football, NBA, NHL, MLB. Skipped automatically when there are no games |
 | Fantasy | Your Yahoo matchup page, shown by the tablet's browser (or a Yahoo data file, or Sleeper) | Hidden outside the season window and whenever it is not available |
+| Photos | A shared Google Drive folder | Optional. Stays out of the rotation until a folder and API key are set (see Photos below) |
 
 Tap the right half of the screen for the next screen and the left half for the previous one. Tap the faint gear in the top-right corner for settings. Night mode blacks the screen between set hours, and a tap wakes it for one minute.
 
@@ -100,6 +101,21 @@ The reader (`scripts/extractors/yahoo-matchup.js`) is version 0 and has not been
 Until then, the Fantasy screen stays out of the rotation if nothing could be read.
 
 Other providers still exist as options on the settings page: a Yahoo data file (`data/yahoo-fantasy.json`, schema in `data/yahoo-fantasy.example.json`) and the Sleeper read-only API.
+
+## Photos (Google Drive folder)
+
+The Photos screen shows pictures from a Google Drive folder. Put photos in the folder from any phone or computer and they appear on the tablet within the refresh time (default 10 minutes). Each time the rotation reaches Photos it shows the next photo, shuffled so every photo appears before any repeats. The screen stays out of the rotation until a folder and key are set and the folder has photos.
+
+Set it up once:
+1. **Make the folder.** In Google Drive create a folder, for example "Wall Photos". Click Share. Under General access choose "Anyone with the link" and set it to Viewer, so the tablet can read it without signing in. Add the family members who should upload as Editors by email.
+2. **Make a read-only API key.** Go to https://console.cloud.google.com and sign in. Create a project (any name). Open APIs and Services, then Library, search for "Google Drive API" and click Enable. Open Credentials, then Create credentials, then API key. Click the key, and under API restrictions choose "Restrict key" and tick only Google Drive API. Under Application restrictions choose Websites and add `http://127.0.0.1:8080/*`. Save and copy the key.
+3. **Enter both on the tablet.** Tap the gear, find Photos, paste the folder address (the full address from the browser bar works) and the key, then Save.
+
+Notes:
+- Only pictures directly inside the folder show, not subfolders. iPhone photos work, because Drive converts them for display.
+- Delete a photo in Drive and it drops out at the next refresh.
+- The key is saved on the tablet only and is never committed to Git. It can only read, and it only works for pages served from the tablet's own address. Anyone with the folder link can view the photos, so keep the link private.
+- If the internet drops, the tablet keeps the list and shows photos it already loaded where it can, but it cannot fetch new ones until it is back online.
 
 ## Try it on a PC
 

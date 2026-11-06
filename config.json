@@ -3,8 +3,8 @@
   "themeAutoLightStart": 7,
   "themeAutoLightEnd": 19,
   "rotateSeconds": 20,
-  "order": ["clock", "weather", "scores", "fantasy"],
-  "enabled": { "clock": true, "weather": true, "scores": true, "fantasy": true },
+  "order": ["clock", "weather", "scores", "fantasy", "photos"],
+  "enabled": { "clock": true, "weather": true, "scores": true, "fantasy": true, "photos": true },
   "seconds": {},
   "clock": {
     "use24Hour": false
@@ -43,6 +43,13 @@
     "seasonStart": "09-01",
     "seasonEnd": "01-15",
     "refreshMinutes": 5
+  },
+  "photos": {
+    "folderId": "",
+    "apiKey": "",
+    "shuffle": true,
+    "fit": "fit",
+    "refreshMinutes": 10
   },
   "nightMode": {
     "enabled": true,

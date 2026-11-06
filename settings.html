@@ -96,6 +96,21 @@
     </section>
 
     <section>
+      <h2>Photos</h2>
+      <p class="hint">Shows photos from a shared Google Drive folder. Share the folder so anyone with the link can view it, then paste its address and a read-only Google API key (steps in the README). Photos you add to the folder appear within the refresh time.</p>
+      <label class="row"><span>Drive folder address or ID</span><input id="photoFolder" type="text" autocomplete="off"></label>
+      <label class="row"><span>Google API key</span><input id="photoKey" type="password" autocomplete="off"></label>
+      <label class="row check"><input id="photoShuffle" type="checkbox"><span>Shuffle (every photo shows before any repeats)</span></label>
+      <label class="row"><span>Fit</span>
+        <select id="photoFit">
+          <option value="fit">Whole photo, blurred sides</option>
+          <option value="fill">Fill the screen (crops)</option>
+        </select>
+      </label>
+      <label class="row"><span>Check for new photos (minutes)</span><input id="photoRefresh" type="number" min="1" max="1440"></label>
+    </section>
+
+    <section>
       <h2>Night mode</h2>
       <label class="row check"><input id="nightEnabled" type="checkbox"><span>Black out the screen at night (tap to wake for a minute)</span></label>
       <label class="row"><span>Starts at hour (0-23)</span><input id="nightStart" type="number" min="0" max="23"></label>

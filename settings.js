@@ -107,6 +107,13 @@ function fillForm() {
   $("seasonStart").value = f.seasonStart || "";
   $("seasonEnd").value = f.seasonEnd || "";
 
+  const ph = w.photos || {};
+  $("photoFolder").value = ph.folderId || "";
+  $("photoKey").value = ph.apiKey || "";
+  $("photoShuffle").checked = ph.shuffle !== false;
+  $("photoFit").value = ph.fit || "fit";
+  $("photoRefresh").value = ph.refreshMinutes || 10;
+
   $("theme").value = w.theme || "dark";
   $("themeAutoLightStart").value = w.themeAutoLightStart === undefined ? 7 : w.themeAutoLightStart;
   $("themeAutoLightEnd").value = w.themeAutoLightEnd === undefined ? 19 : w.themeAutoLightEnd;
@@ -158,6 +165,13 @@ function readForm() {
       autoHideOffSeason: $("autoHideOffSeason").checked,
       seasonStart: $("seasonStart").value.trim() || f.seasonStart,
       seasonEnd: $("seasonEnd").value.trim() || f.seasonEnd
+    },
+    photos: {
+      folderId: $("photoFolder").value.trim(),
+      apiKey: $("photoKey").value.trim(),
+      shuffle: $("photoShuffle").checked,
+      fit: $("photoFit").value,
+      refreshMinutes: Math.min(1440, Math.max(1, numberOr($("photoRefresh").value, 10)))
     },
     theme: $("theme").value,
     themeAutoLightStart: Math.min(23, Math.max(0, numberOr($("themeAutoLightStart").value, 7))),

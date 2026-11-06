@@ -35,14 +35,98 @@ let wakeUntil = 0;
 
 /* Runtime state that decides whether a screen can be shown right now. */
 const state = {
+  photos: [],
+  photoQueue: [],
   fantasyReady: false,
   scoresHaveGames: true
 };
 
 /* ---------- Which screens are in the rotation ---------- */
 
+/* ---------- Photos: a shared Google Drive folder, read with an API key ---------- */
+
+function parseFolderId(text) {
+  const raw = String(text || "").trim();
+  const m = /folders\/([A-Za-z0-9_-]+)/.exec(raw) || /[?&]id=([A-Za-z0-9_-]+)/.exec(raw);
+  return m ? m[1] : raw;
+}
+
+function photosConfigured() {
+  const p = settings.photos || {};
+  return !!(parseFolderId(p.folderId) && String(p.apiKey || "").trim());
+}
+
+function photoUrl(file) {
+  // Drive's thumbnail is already rotated and converted (HEIC becomes JPEG); ask for a large one.
+  return file.thumbnailLink ? file.thumbnailLink.replace(/=s\d+$/, "=w1920") : "";
+}
+
+async function refreshPhotos() {
+  if (!photosConfigured()) return;
+  const p = settings.photos;
+  const folder = parseFolderId(p.folderId);
+  const url = "https://www.googleapis.com/drive/v3/files?q=" +
+    encodeURIComponent("'" + folder + "' in parents and mimeType contains 'image/' and trashed=false") +
+    "&fields=" + encodeURIComponent("files(id,name,thumbnailLink)") +
+    "&pageSize=200&orderBy=" + encodeURIComponent("createdTime desc") +
+    "&key=" + encodeURIComponent(String(p.apiKey).trim());
+  try {
+    const data = await getJSON(url);
+    const files = (data.files || []).filter((f) => f.thumbnailLink);
+    state.photos = files;
+    try { localStorage.setItem("wallDashboard.photoList", JSON.stringify(files)); } catch (err) { /* ignore */ }
+    // Drop queued photos that no longer exist; new ones join at the next refill.
+    const ids = new Set(files.map((f) => f.id));
+    state.photoQueue = state.photoQueue.filter((id) => ids.has(id));
+  } catch (err) {
+    setStatus("photos: " + err.message);
+    if (!state.photos.length) {
+      try { state.photos = JSON.parse(localStorage.getItem("wallDashboard.photoList") || "[]"); } catch (e) { /* ignore */ }
+    }
+  }
+  drawDots(activeScreens());
+}
+
+function nextPhoto() {
+  const p = settings.photos || {};
+  if (!state.photos.length) return null;
+  if (!state.photoQueue.length) {
+    const ids = state.photos.map((f) => f.id);
+    if (p.shuffle !== false) {
+      for (let i = ids.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [ids[i], ids[j]] = [ids[j], ids[i]];
+      }
+    }
+    state.photoQueue = ids;
+  }
+  const id = state.photoQueue.shift();
+  return state.photos.find((f) => f.id === id) || null;
+}
+
+function showPhoto(attempt) {
+  const file = nextPhoto();
+  const img = $("photo-img");
+  if (!file) return;
+  const src = photoUrl(file);
+  const loader = new Image();
+  loader.onload = () => {
+    img.classList.remove("in");
+    setTimeout(() => {
+      img.src = src;
+      img.classList.toggle("cover", (settings.photos || {}).fit === "fill");
+      $("photo-bg").style.backgroundImage = "url('" + src + "')";
+      img.classList.add("in");
+    }, 300);
+  };
+  loader.onerror = () => { if ((attempt || 0) < 4) showPhoto((attempt || 0) + 1); };
+  loader.src = src;
+}
+
 function screenAvailable(id) {
   if (settings.enabled[id] === false) return false;
+
+  if (id === "photos") return photosConfigured() && state.photos.length > 0;
 
   if (id === "fantasy") {
     const f = settings.fantasy || {};
@@ -442,6 +526,7 @@ function show(id) {
   currentId = id;
   SCREEN_IDS.forEach((name) => $("screen-" + name).classList.toggle("active", name === id));
   drawDots(activeScreens());
+  if (id === "photos") showPhoto(0);
 
   if (fantasyViaPage()) {
     if (id === "fantasy" && !isNight()) {
@@ -501,6 +586,7 @@ async function init() {
 
   every((settings.weather || {}).refreshMinutes, refreshWeather);
   every((settings.scores || {}).refreshMinutes, refreshScores);
+  every((settings.photos || {}).refreshMinutes, refreshPhotos);
   const fantasyCfg = settings.fantasy || {};
   if (fantasyCfg.provider === "yahoo-live") {
     refreshFantasy();

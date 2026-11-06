@@ -9,7 +9,7 @@
  */
 
 const SETTINGS_KEY = "wallDashboard.settings";
-const SCREEN_IDS = ["clock", "weather", "scores", "fantasy"];
+const SCREEN_IDS = ["clock", "weather", "scores", "fantasy", "photos"];
 
 function isPlainObject(v) {
   return v !== null && typeof v === "object" && !Array.isArray(v);

@@ -241,3 +241,17 @@ html, body {
 @keyframes fall { from { transform: translateY(-30px); } to { transform: translateY(940px); } }
 @keyframes snow { from { transform: translate(0, -20px); } 50% { transform: translate(18px, 460px); } to { transform: translate(-10px, 940px); } }
 @media (prefers-reduced-motion: reduce) { .cloud, .drop, .flake { animation: none; } }
+
+/* Photos */
+#screen-photos { padding: 0; background: #000; }
+#photo-bg {
+  position: absolute; inset: -4vmin;
+  background-size: cover; background-position: center;
+  filter: blur(4.5vmin) brightness(0.55);
+}
+#photo-img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: contain; opacity: 0; transition: opacity 1s ease;
+}
+#photo-img.cover { object-fit: cover; }
+#photo-img.in { opacity: 1; }
