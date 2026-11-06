@@ -38,6 +38,8 @@ def post(url, body):
             return response.status, dict(response.headers), response.read()
     except urllib.error.HTTPError as err:
         return err.code, dict(err.headers), err.read()
+    except (urllib.error.URLError, OSError) as err:
+        return 0, {}, ("connection failed: %s" % err).encode()
 
 
 def main():
@@ -47,6 +49,8 @@ def main():
     token = token_from(sys.argv[1])
     host = "p%02d-sharedstreams.icloud.com" % partition(token)
     print("token length:", len(token), "first guess host:", host)
+    if partition(token) > 99:
+        print("note: this token does not fit the older album address scheme (server number %d), so the older method may not apply" % partition(token))
     for attempt in range(3):
         status, headers, body = post("https://%s/%s/sharedstreams/webstream" % (host, token), {"streamCtag": None})
         print("attempt", attempt + 1, "status", status)
