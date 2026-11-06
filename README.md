@@ -23,7 +23,7 @@ git clone https://github.com/WestbergLabs/wall-dashboard.git ~/wall-dashboard
 Do not put `sudo` in front of the third line. If the repository is private, `git clone` asks for your GitHub username and a personal access token as the password.
 
 **Step 3. Answer the questions.** Press Enter to accept the value in brackets.
-1. *Yahoo matchup page address.* On any device, open your league's Matchup page, copy the address from the browser bar, and paste it here. Enter accepts the default, which is a guess and may be wrong.
+1. *Yahoo matchup page address.* Press Enter. The default is the Turf Titans league's matchup page, `https://football.fantasysports.yahoo.com/f1/46800/matchup`, and it only shows anything after signing in. For a different league, paste that league's Matchup page address instead.
 2. *Fantasy mode.* `1` shows Yahoo's own page on the Fantasy screen. `2` redraws the matchup in the dashboard style (it reads the page automatically, which Yahoo's terms prohibit, see below). `3` turns the Fantasy screen off.
 3. *Open the Yahoo sign-in now?* Type `y`. A Chrome window opens. Sign in to Yahoo, tick "Stay signed in", make sure the matchup page shows, then close the window. Skip Chrome's own sign-in prompts. Type `n` for fantasy mode 3.
 
