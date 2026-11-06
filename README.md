@@ -56,24 +56,24 @@ Other providers still exist as options on the settings page: a Yahoo data file (
 
 ## Quick start (tablet)
 
-Takes about 15 minutes, most of it the operating system install.
+One supported setup: **Ubuntu Desktop 24.04 LTS** with Google Chrome. Takes about 15 minutes, most of it the OS install.
 
-1. **Install Linux.** Ubuntu Desktop or Debian with GNOME works. Create a normal user (for example `dashboard`), connect to Wi-Fi, and turn on automatic login in the desktop's user settings.
+1. **Install Ubuntu Desktop 24.04 LTS** on the tablet from a USB stick (https://ubuntu.com/download/desktop). Create a user named `dashboard`, connect to Wi-Fi, and finish the installer.
 2. **Get the code and run setup.** Open a terminal on the tablet:
    ```bash
    sudo apt-get install -y git
    git clone https://github.com/WestbergLabs/wall-dashboard.git ~/wall-dashboard
    ~/wall-dashboard/scripts/setup.sh
    ```
-   Run it as your normal user, not with `sudo`. It asks for your password only to install packages.
+   Run it as the `dashboard` user, not with `sudo`. It asks for your password only to install packages and turn on automatic login.
 3. **Answer three questions.**
    - Your Yahoo matchup page address (open the Matchup page in any browser and copy it).
    - Fantasy mode: `1` show Yahoo's page, `2` redraw it in the dashboard style, `3` no Fantasy screen.
    - Whether to open the Yahoo sign-in window now. Say `y`, sign in, tick "Stay signed in", check the matchup page loads, then close the window.
 4. **Test it.** Run `~/wall-dashboard/scripts/kiosk.sh`. Leave kiosk mode with Alt+F4.
-5. **Reboot.** The dashboard starts by itself after login.
+5. **Reboot.** The tablet logs in by itself and the dashboard starts.
 
-What setup does: installs Python, git and Chrome (Chromium on Debian, Google Chrome on Ubuntu because Ubuntu's Chromium is a snap that blocks the profile folder), writes `scripts/kiosk.env` and `config.local.json` (both git-ignored), adds a login autostart entry, and turns off screen sleep. It is safe to run again. Use `--no-install` to skip packages.
+What setup does: installs Python, git and Google Chrome, turns on automatic login, writes `scripts/kiosk.env` and `config.local.json` (both git-ignored), adds a login autostart entry, and turns off screen sleep. It is safe to run again. 
 
 Day to day:
 - Settings: tap the gear icon (screens, order, seconds, weather, leagues, fantasy mode, night mode).

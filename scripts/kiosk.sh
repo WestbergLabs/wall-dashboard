@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Launch the wall dashboard full screen in Chromium kiosk mode.
+# Launch the wall dashboard full screen in Chrome kiosk mode.
 #  - serves the project folder on localhost so fetch() of config.json works
 #  - runs the tab controller so the Fantasy screen can show your Yahoo matchup page
 #
@@ -36,9 +36,9 @@ trap 'kill "$SERVER_PID" "$CONTROLLER_PID" 2>/dev/null || true' EXIT
 # Keep the screen awake (ignore failures on systems without xset, e.g. Wayland).
 xset s off -dpms s noblank 2>/dev/null || true
 
-BROWSER="$(command -v chromium || command -v chromium-browser || command -v google-chrome || true)"
+BROWSER="$(command -v google-chrome || true)"
 if [ -z "$BROWSER" ]; then
-  echo "No Chromium or Chrome found. Install one first (see README)." >&2
+  echo "Google Chrome not found. Run scripts/setup.sh first." >&2
   exit 1
 fi
 

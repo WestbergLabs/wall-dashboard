@@ -14,9 +14,9 @@ fi
 PROFILE="${DASHBOARD_PROFILE:-$HOME/.config/wall-dashboard-chrome}"
 YAHOO_URL="${YAHOO_MATCHUP_URL:-https://football.fantasysports.yahoo.com/f1/46800/matchup}"
 
-BROWSER="$(command -v chromium || command -v chromium-browser || command -v google-chrome || true)"
+BROWSER="$(command -v google-chrome || true)"
 if [ -z "$BROWSER" ]; then
-  echo "No Chromium or Chrome found. Install one first (see README)." >&2
+  echo "Google Chrome not found. Run scripts/setup.sh first." >&2
   exit 1
 fi
 

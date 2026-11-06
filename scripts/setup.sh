@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# One-command setup for the wall dashboard tablet (Debian or Ubuntu with a desktop).
+# One-command setup for the wall dashboard tablet: Ubuntu Desktop 24.04 LTS, Google Chrome.
 #
 #   git clone https://github.com/WestbergLabs/wall-dashboard.git ~/wall-dashboard
 #   ~/wall-dashboard/scripts/setup.sh
@@ -8,7 +8,7 @@
 # Safe to run again: it never overwrites your answers without asking.
 #
 # Options:
-#   --no-install   skip package installation (already installed, or testing)
+#   --no-install   skip package installation and the automatic login change (testing)
 #   --yes          accept defaults without asking (Yahoo mode "page", no sign-in step)
 set -euo pipefail
 
@@ -37,32 +37,26 @@ if [ "$(id -u)" = 0 ]; then
 fi
 
 # 1. Packages ---------------------------------------------------------------------------
-find_browser() { command -v google-chrome || command -v chromium || command -v chromium-browser || true; }
-
 say "1/5 Installing packages"
+. /etc/os-release
+if [ "${ID:-}" != "ubuntu" ]; then
+  echo "This setup supports Ubuntu Desktop 24.04 LTS only (found: ${PRETTY_NAME:-unknown})." >&2
+  exit 1
+fi
 if [ "$INSTALL" = 1 ]; then
-  command -v apt-get >/dev/null || { echo "This script needs apt (Debian or Ubuntu)." >&2; exit 1; }
   sudo apt-get update
-  sudo apt-get install -y python3 git curl x11-xserver-utils unclutter
-  if [ -z "$(find_browser)" ]; then
-    . /etc/os-release
-    if [ "${ID:-}" = "ubuntu" ]; then
-      # Ubuntu's chromium is a snap, which blocks the profile folder the kiosk needs.
-      echo "Installing Google Chrome (Ubuntu's Chromium is a snap and does not work here)."
-      tmp="$(mktemp --suffix=.deb)"
-      curl -fsSL -o "$tmp" https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-      sudo apt-get install -y "$tmp"
-      rm -f "$tmp"
-    else
-      sudo apt-get install -y chromium
-    fi
+  sudo apt-get install -y python3 git curl x11-xserver-utils
+  if ! command -v google-chrome >/dev/null 2>&1; then
+    tmp="$(mktemp --suffix=.deb)"
+    curl -fsSL -o "$tmp" https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    sudo apt-get install -y "$tmp"
+    rm -f "$tmp"
   fi
 else
   echo "Skipped (--no-install)."
 fi
-BROWSER="$(find_browser)"
-[ -n "$BROWSER" ] || { echo "No Chrome or Chromium found. Install one and run again." >&2; exit 1; }
-echo "Browser: $BROWSER"
+command -v google-chrome >/dev/null 2>&1 || { echo "Google Chrome is not installed. Run again without --no-install." >&2; exit 1; }
+echo "Browser: $(command -v google-chrome)"
 python3 --version
 
 # 2. Settings ---------------------------------------------------------------------------
@@ -136,9 +130,26 @@ if command -v gsettings >/dev/null 2>&1; then
   gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 'nothing' 2>/dev/null || true
   echo "Screen blanking, lock and sleep turned off (GNOME)."
 else
-  echo "No GNOME settings tool found. kiosk.sh still disables blanking through xset."
+  echo "No GNOME settings tool found."
 fi
-echo "Also turn on automatic login in your desktop's user settings if it is not on yet."
+if [ "$INSTALL" = 1 ] && [ -f /etc/gdm3/custom.conf ]; then
+  sudo python3 - /etc/gdm3/custom.conf "$USER" <<'PY'
+import re, sys
+path, user = sys.argv[1], sys.argv[2]
+text = open(path).read()
+if "[daemon]" not in text:
+    text = "[daemon]\n" + text
+def setkey(text, key, value):
+    pattern = r"^[#;\s]*%s\s*=.*$" % key
+    if re.search(pattern, text, flags=re.M):
+        return re.sub(pattern, "%s=%s" % (key, value), text, count=1, flags=re.M)
+    return text.replace("[daemon]", "[daemon]\n%s=%s" % (key, value), 1)
+text = setkey(text, "AutomaticLoginEnable", "true")
+text = setkey(text, "AutomaticLogin", user)
+open(path, "w").write(text)
+PY
+  echo "Automatic login turned on for $USER."
+fi
 
 # 5. Yahoo sign-in --------------------------------------------------------------------------
 say "5/5 Yahoo sign-in"
