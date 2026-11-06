@@ -1,0 +1,32 @@
+/* Color themes. The page gets data-theme="dark" or data-theme="paper" from shared.js. */
+:root,
+:root[data-theme="dark"] {
+  --bg: #0e1116;
+  --fg: #f2f4f8;
+  --muted: #8b95a5;
+  --accent: #f5b942;
+  --card: #171c24;
+  --line: #2a313c;
+  --track: #2a313c;
+  --flash: #2a3544;
+  --good: #4cc38a;
+  --bad: #ef6a6a;
+  --icon-filter: none;
+  color-scheme: dark;
+}
+
+/* Paper: off-white with black ink and no color, the closest to an e-ink look. */
+:root[data-theme="paper"] {
+  --bg: #f3f0e8;
+  --fg: #1b1b1a;
+  --muted: #6a665c;
+  --accent: #1b1b1a;
+  --card: #e8e4d9;
+  --line: #cfcabc;
+  --track: #cfcabc;
+  --flash: #d9d4c5;
+  --good: #1b1b1a;
+  --bad: #1b1b1a;
+  --icon-filter: grayscale(1) contrast(1.1);
+  color-scheme: light;
+}

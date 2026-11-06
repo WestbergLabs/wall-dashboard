@@ -105,6 +105,10 @@ function fillForm() {
   $("seasonStart").value = f.seasonStart || "";
   $("seasonEnd").value = f.seasonEnd || "";
 
+  $("theme").value = w.theme || "dark";
+  $("themeAutoLightStart").value = w.themeAutoLightStart === undefined ? 7 : w.themeAutoLightStart;
+  $("themeAutoLightEnd").value = w.themeAutoLightEnd === undefined ? 19 : w.themeAutoLightEnd;
+
   const n = w.nightMode || {};
   $("nightEnabled").checked = !!n.enabled;
   $("nightStart").value = n.startHour;
@@ -150,6 +154,9 @@ function readForm() {
       seasonStart: $("seasonStart").value.trim() || f.seasonStart,
       seasonEnd: $("seasonEnd").value.trim() || f.seasonEnd
     },
+    theme: $("theme").value,
+    themeAutoLightStart: Math.min(23, Math.max(0, numberOr($("themeAutoLightStart").value, 7))),
+    themeAutoLightEnd: Math.min(23, Math.max(0, numberOr($("themeAutoLightEnd").value, 19))),
     nightMode: {
       enabled: $("nightEnabled").checked,
       startHour: Math.min(23, Math.max(0, numberOr($("nightStart").value, 23))),
@@ -193,6 +200,10 @@ async function start() {
   defaults = loaded.defaults;
   if (loaded.error) say("Could not read config.json: " + loaded.error.message);
   fillForm();
+  applyTheme(working);
+  for (const id of ["theme", "themeAutoLightStart", "themeAutoLightEnd"]) {
+    $(id).addEventListener("input", () => applyTheme(readForm()));
+  }
 }
 
 start();

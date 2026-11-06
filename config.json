@@ -1,4 +1,7 @@
 {
+  "theme": "dark",
+  "themeAutoLightStart": 7,
+  "themeAutoLightEnd": 19,
   "rotateSeconds": 20,
   "order": ["clock", "weather", "scores", "fantasy"],
   "enabled": { "clock": true, "weather": true, "scores": true, "fantasy": true },

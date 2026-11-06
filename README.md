@@ -68,6 +68,7 @@ Open `settings.html` (the gear icon). Settings are saved on that device in the b
 
 - turn each screen on or off, reorder them, and set seconds per screen (blank uses the default)
 - default seconds per screen
+- **theme**: Dark (default), Paper (off-white, black ink, no color, closest to e-ink) or Auto (paper by day, dark at night, hours adjustable); picking one previews it immediately
 - clock format, weather place, coordinates and units
 - which sports leagues appear, and whether to skip Scores when nothing is playing
 - fantasy provider, how often the Yahoo page may be reopened, plus **Hide automatically in the off-season** with a start and end date (default 09-01 to 01-15)

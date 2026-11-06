@@ -468,6 +468,8 @@ async function init() {
   settings = loaded.settings;
   if (loaded.error) setStatus(loaded.error.message + " (using built-in defaults)");
 
+  applyTheme(settings);
+  setInterval(() => applyTheme(settings), 60000);
   renderClock();
   setInterval(renderClock, 1000);
   setInterval(applyNightMode, 30000);

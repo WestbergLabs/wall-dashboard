@@ -92,3 +92,22 @@ function inSeason(start, end, date) {
   if (!/^\d\d-\d\d$/.test(start || "") || !/^\d\d-\d\d$/.test(end || "")) return true;
   return start <= end ? md >= start && md <= end : md >= start || md <= end;
 }
+
+/*
+ * Themes: "dark", "paper", or "auto" (paper from themeAutoLightStart to themeAutoLightEnd, dark otherwise).
+ */
+function resolveTheme(settings, date) {
+  const choice = (settings && settings.theme) || "dark";
+  if (choice === "paper" || choice === "dark") return choice;
+  const hour = (date || new Date()).getHours();
+  const start = Number(settings.themeAutoLightStart);
+  const end = Number(settings.themeAutoLightEnd);
+  const from = Number.isFinite(start) ? start : 7;
+  const to = Number.isFinite(end) ? end : 19;
+  const light = from <= to ? hour >= from && hour < to : hour >= from || hour < to;
+  return light ? "paper" : "dark";
+}
+
+function applyTheme(settings) {
+  document.documentElement.setAttribute("data-theme", resolveTheme(settings));
+}

@@ -1,13 +1,3 @@
-:root {
-  --bg: #0e1116;
-  --fg: #f2f4f8;
-  --muted: #8b95a5;
-  --accent: #f5b942;
-  --card: #171c24;
-  --line: #2a313c;
-  --bad: #ef6a6a;
-}
-
 * { box-sizing: border-box; }
 
 body {
