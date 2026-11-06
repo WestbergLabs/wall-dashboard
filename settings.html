@@ -29,10 +29,25 @@
     <section>
       <h2>Clock</h2>
       <label class="row check"><input id="use24Hour" type="checkbox"><span>24 hour time</span></label>
+      <label class="row"><span>Time zone</span>
+        <select id="clockZone">
+          <option value="device">Device (the tablet's own setting)</option>
+          <option value="auto">Automatic (follows the weather place)</option>
+          <option value="custom">Specific zone (enter below)</option>
+        </select>
+      </label>
+      <label class="row"><span>Zone name, for example America/Chicago</span><input id="clockZoneName" type="text" autocomplete="off"></label>
     </section>
 
     <section>
       <h2>Weather</h2>
+      <label class="row"><span>Place</span>
+        <select id="weatherLocation">
+          <option value="fixed">Fixed (use the fields below)</option>
+          <option value="auto">Automatic (from the internet connection)</option>
+        </select>
+      </label>
+      <p class="hint">Automatic looks up the approximate city of the connection through a free location service, which sees the tablet's public IP address. It is refreshed every 6 hours, so the dashboard follows the tablet if you move it. If the lookup fails, the fixed place below is used.</p>
       <label class="row"><span>Place name</span><input id="weatherName" type="text"></label>
       <label class="row"><span>Latitude</span><input id="weatherLat" type="number" step="any"></label>
       <label class="row"><span>Longitude</span><input id="weatherLon" type="number" step="any"></label>

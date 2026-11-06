@@ -35,6 +35,8 @@ let wakeUntil = 0;
 
 /* Runtime state that decides whether a screen can be shown right now. */
 const state = {
+  locationTz: undefined,
+  weatherPlace: null,
   photos: [],
   photoQueue: [],
   fantasyReady: false,
@@ -154,12 +156,21 @@ function secondsFor(id) {
 
 /* ---------- Clock ---------- */
 
+function applyTimeZone() {
+  const c = settings.clock || {};
+  const choice = c.timeZone || "device";
+  if (choice === "device") setWallTimeZone(undefined);
+  else if (choice === "auto") setWallTimeZone(state.locationTz);   // follows the weather location
+  else setWallTimeZone(choice);
+}
+
 function renderClock() {
   const now = new Date();
   const use24 = settings.clock && settings.clock.use24Hour;
-  const opts = { hour: "numeric", minute: "2-digit", hour12: !use24 };
+  const tz = wallTimeZone;
+  const opts = { hour: "numeric", minute: "2-digit", hour12: !use24, timeZone: tz };
   $("clock-time").textContent = now.toLocaleTimeString([], opts).replace(/\s?[AP]M$/i, "");
-  $("clock-date").textContent = now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" });
+  $("clock-date").textContent = now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric", timeZone: tz });
 }
 
 /* ---------- Weather ---------- */
@@ -167,7 +178,7 @@ function renderClock() {
 let sceneChoice = "town";
 
 async function updateWeatherScene() {
-  const w = settings.weather || {};
+  const w = state.weatherPlace || settings.weather || {};
   const data = state.weatherData;
   const container = $("weather-scene");
   if (!container || !data) return;
@@ -186,9 +197,47 @@ async function updateWeatherScene() {
 new MutationObserver(() => updateWeatherScene()).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 setInterval(updateWeatherScene, 5 * 60 * 1000);
 
+/* Automatic place: the internet connection's approximate location (city level). */
+const AUTO_LOCATION_KEY = "wallDashboard.autoLocation";
+const AUTO_LOCATION_TTL_MS = 6 * 60 * 60 * 1000;
+
+async function lookupAutoLocation() {
+  try {
+    const cached = JSON.parse(localStorage.getItem(AUTO_LOCATION_KEY) || "null");
+    if (cached && Date.now() - cached.at < AUTO_LOCATION_TTL_MS) return cached.place;
+  } catch (err) { /* ignore */ }
+  for (const url of ["https://ipapi.co/json/", "https://ipwho.is/"]) {
+    try {
+      const d = await getJSON(url);
+      const lat = Number(d.latitude), lon = Number(d.longitude);
+      if (Number.isFinite(lat) && Number.isFinite(lon) && d.city) {
+        const place = { name: d.city + (d.region_code ? ", " + d.region_code : ""), latitude: lat, longitude: lon };
+        try { localStorage.setItem(AUTO_LOCATION_KEY, JSON.stringify({ at: Date.now(), place })); } catch (err) { /* ignore */ }
+        return place;
+      }
+    } catch (err) { /* try the next service */ }
+  }
+  try {
+    const old = JSON.parse(localStorage.getItem(AUTO_LOCATION_KEY) || "null");
+    if (old) return old.place;   // better a stale place than none
+  } catch (err) { /* ignore */ }
+  return null;
+}
+
+async function resolveWeatherPlace() {
+  const w = settings.weather || {};
+  if (w.location === "auto") {
+    const place = await lookupAutoLocation();
+    if (place) return Object.assign({}, w, place);
+    setStatus("automatic location unavailable, using the saved place");
+  }
+  return w;
+}
+
 async function refreshWeather() {
-  const w = settings.weather;
-  if (!w) return;
+  const w = await resolveWeatherPlace();
+  state.weatherPlace = w;
+  if (!w || w.latitude === undefined) return;
   const unit = w.units === "celsius" ? "celsius" : "fahrenheit";
   const url = "https://api.open-meteo.com/v1/forecast?latitude=" + encodeURIComponent(w.latitude) +
     "&longitude=" + encodeURIComponent(w.longitude) +
@@ -198,6 +247,7 @@ async function refreshWeather() {
   try {
     const data = await getJSON(url);
     state.weatherData = data;
+    if (data.timezone) { state.locationTz = data.timezone; applyTimeZone(); renderClock(); applyNightMode(); applyTheme(settings); }
     updateWeatherScene();
     const [desc, icon] = WEATHER_CODES[data.current.weather_code] || ["", "❓"];
     $("weather-place").textContent = w.name || "Weather";
@@ -550,7 +600,7 @@ function step(direction) {
 function applyNightMode() {
   const n = settings.nightMode;
   if (!n || !n.enabled) { $("night").classList.remove("on"); return; }
-  const hour = new Date().getHours();
+  const hour = zonedHour(new Date(), wallTimeZone);
   const inNight = n.startHour > n.endHour
     ? hour >= n.startHour || hour < n.endHour
     : hour >= n.startHour && hour < n.endHour;
@@ -577,6 +627,7 @@ async function init() {
   settings = loaded.settings;
   if (loaded.error) setStatus(loaded.error.message + " (using built-in defaults)");
 
+  applyTimeZone();
   applyTheme(settings);
   setInterval(() => applyTheme(settings), 60000);
   renderClock();

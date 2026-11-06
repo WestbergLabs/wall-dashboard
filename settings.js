@@ -88,7 +88,11 @@ function fillForm() {
   const w = working;
   $("rotateSeconds").value = w.rotateSeconds;
   $("use24Hour").checked = !!(w.clock && w.clock.use24Hour);
+  const zone = (w.clock && w.clock.timeZone) || "device";
+  $("clockZone").value = zone === "device" || zone === "auto" ? zone : "custom";
+  $("clockZoneName").value = zone === "device" || zone === "auto" ? "" : zone;
 
+  $("weatherLocation").value = (w.weather && w.weather.location) || "fixed";
   $("weatherName").value = (w.weather && w.weather.name) || "";
   $("weatherLat").value = w.weather ? w.weather.latitude : "";
   $("weatherLon").value = w.weather ? w.weather.longitude : "";
@@ -141,8 +145,14 @@ function readForm() {
     order: base.order.slice(),
     enabled: Object.assign({}, base.enabled),
     seconds: Object.assign({}, base.seconds),
-    clock: { use24Hour: $("use24Hour").checked },
+    clock: {
+      use24Hour: $("use24Hour").checked,
+      timeZone: $("clockZone").value === "custom"
+        ? ($("clockZoneName").value.trim() || "device")
+        : $("clockZone").value
+    },
     weather: {
+      location: $("weatherLocation").value,
       name: $("weatherName").value.trim(),
       latitude: numberOr($("weatherLat").value, bw.latitude),
       longitude: numberOr($("weatherLon").value, bw.longitude),

@@ -70,6 +70,7 @@ Open `settings.html` (the gear icon). Settings are saved on that device in the b
 - turn each screen on or off, reorder them, and set seconds per screen (blank uses the default)
 - default seconds per screen
 - **theme**: Dark (default), Paper (off-white, black ink, no color, closest to e-ink) or Auto (paper by day, dark at night, hours adjustable); picking one previews it immediately
+- **automatic place and time zone**: Place can be Automatic, which uses the approximate city of the internet connection (a free location service sees the tablet's public IP address, refreshed every 6 hours, so the dashboard follows the tablet if you move it). Time zone can follow the device, follow the weather place, or be a specific zone such as America/Chicago. Night mode and Auto theme use the same time zone. If the lookup fails, the saved fixed place is used
 - clock format, weather place, coordinates and units, and the weather background (Auto, city, small town, lake, farmland or none) with rain, snow and cloud animation on or off
 - which sports leagues appear, and whether to skip Scores when nothing is playing
 - fantasy provider, how often the Yahoo page may be reopened, plus **Hide automatically in the off-season** with a start and end date (default 09-01 to 01-15)

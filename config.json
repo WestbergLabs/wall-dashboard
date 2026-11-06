@@ -7,9 +7,11 @@
   "enabled": { "clock": true, "weather": true, "scores": true, "fantasy": true, "photos": true },
   "seconds": {},
   "clock": {
-    "use24Hour": false
+    "use24Hour": false,
+    "timeZone": "device"
   },
   "weather": {
+    "location": "fixed",
     "name": "Merrill, WI",
     "latitude": 45.18,
     "longitude": -89.69,

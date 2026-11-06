@@ -96,10 +96,27 @@ function inSeason(start, end, date) {
 /*
  * Themes: "dark", "paper", or "auto" (paper from themeAutoLightStart to themeAutoLightEnd, dark otherwise).
  */
+let wallTimeZone;  // IANA name, or undefined for the device's own time zone
+
+function setWallTimeZone(tz) {
+  wallTimeZone = validTimeZone(tz) ? tz : undefined;
+}
+
+function validTimeZone(tz) {
+  if (!tz || typeof tz !== "string") return false;
+  try { new Intl.DateTimeFormat("en-US", { timeZone: tz }); return true; } catch (err) { return false; }
+}
+
+function zonedHour(date, tz) {
+  if (!tz) return date.getHours();
+  const h = new Intl.DateTimeFormat("en-US", { timeZone: tz, hour: "numeric", hourCycle: "h23" }).format(date);
+  return Number(h) % 24;
+}
+
 function resolveTheme(settings, date) {
   const choice = (settings && settings.theme) || "dark";
   if (choice === "paper" || choice === "dark") return choice;
-  const hour = (date || new Date()).getHours();
+  const hour = zonedHour(date || new Date(), wallTimeZone);
   const start = Number(settings.themeAutoLightStart);
   const end = Number(settings.themeAutoLightEnd);
   const from = Number.isFinite(start) ? start : 7;
