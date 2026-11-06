@@ -1,0 +1,16 @@
+[Unit]
+Description=Wall dashboard kiosk
+After=graphical.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Edit User and the path below to match the tablet.
+User=dashboard
+Environment=DISPLAY=:0
+ExecStart=/home/dashboard/wall-dashboard/scripts/kiosk.sh
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=graphical.target

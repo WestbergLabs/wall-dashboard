@@ -1,0 +1,43 @@
+{
+  "rotateSeconds": 20,
+  "order": ["clock", "weather", "scores", "fantasy"],
+  "enabled": { "clock": true, "weather": true, "scores": true, "fantasy": true },
+  "seconds": {},
+  "clock": {
+    "use24Hour": false
+  },
+  "weather": {
+    "name": "Merrill, WI",
+    "latitude": 45.18,
+    "longitude": -89.69,
+    "units": "fahrenheit",
+    "refreshMinutes": 15
+  },
+  "scores": {
+    "leagues": [
+      { "key": "nfl", "label": "NFL", "sport": "football", "league": "nfl" },
+      { "key": "college-football", "label": "College Football", "sport": "football", "league": "college-football" },
+      { "key": "nba", "label": "NBA", "sport": "basketball", "league": "nba" },
+      { "key": "nhl", "label": "NHL", "sport": "hockey", "league": "nhl" },
+      { "key": "mlb", "label": "MLB", "sport": "baseball", "league": "mlb" }
+    ],
+    "enabled": { "nfl": true, "college-football": false, "nba": true, "nhl": true, "mlb": true },
+    "hideWhenEmpty": true,
+    "refreshMinutes": 2,
+    "maxGamesPerLeague": 6
+  },
+  "fantasy": {
+    "provider": "yahoo",
+    "yahooDataUrl": "data/yahoo-fantasy.json",
+    "sleeperLeagueId": "",
+    "autoHideOffSeason": true,
+    "seasonStart": "09-01",
+    "seasonEnd": "01-15",
+    "refreshMinutes": 5
+  },
+  "nightMode": {
+    "enabled": true,
+    "startHour": 23,
+    "endHour": 6
+  }
+}

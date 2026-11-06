@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard Settings</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <header>
+    <a class="back" href="index.html">&larr; Dashboard</a>
+    <h1>Settings</h1>
+  </header>
+
+  <main>
+    <p class="hint">Saved on this device only. Defaults come from <code>config.json</code>.</p>
+
+    <section>
+      <h2>Screens</h2>
+      <p class="hint">Turn screens on or off, change the order, and optionally set how long each stays up. Leave seconds blank to use the default.</p>
+      <div id="screen-list"></div>
+      <label class="row">
+        <span>Default seconds per screen</span>
+        <input id="rotateSeconds" type="number" min="3" max="600" step="1">
+      </label>
+    </section>
+
+    <section>
+      <h2>Clock</h2>
+      <label class="row check"><input id="use24Hour" type="checkbox"><span>24 hour time</span></label>
+    </section>
+
+    <section>
+      <h2>Weather</h2>
+      <label class="row"><span>Place name</span><input id="weatherName" type="text"></label>
+      <label class="row"><span>Latitude</span><input id="weatherLat" type="number" step="any"></label>
+      <label class="row"><span>Longitude</span><input id="weatherLon" type="number" step="any"></label>
+      <label class="row"><span>Units</span>
+        <select id="weatherUnits">
+          <option value="fahrenheit">Fahrenheit</option>
+          <option value="celsius">Celsius</option>
+        </select>
+      </label>
+    </section>
+
+    <section>
+      <h2>Scores</h2>
+      <div id="league-list"></div>
+      <label class="row check"><input id="hideWhenEmpty" type="checkbox"><span>Skip this screen when there are no games</span></label>
+    </section>
+
+    <section>
+      <h2>Fantasy</h2>
+      <label class="row"><span>Provider</span>
+        <select id="fantasyProvider">
+          <option value="none">None</option>
+          <option value="yahoo">Yahoo (reads data/yahoo-fantasy.json)</option>
+          <option value="sleeper">Sleeper</option>
+        </select>
+      </label>
+      <label class="row"><span>Sleeper league ID</span><input id="sleeperLeagueId" type="text" inputmode="numeric"></label>
+      <label class="row check"><input id="autoHideOffSeason" type="checkbox"><span>Hide automatically in the off-season</span></label>
+      <label class="row"><span>Season starts (MM-DD)</span><input id="seasonStart" type="text" pattern="\d\d-\d\d" maxlength="5" placeholder="09-01"></label>
+      <label class="row"><span>Season ends (MM-DD)</span><input id="seasonEnd" type="text" pattern="\d\d-\d\d" maxlength="5" placeholder="01-15"></label>
+    </section>
+
+    <section>
+      <h2>Night mode</h2>
+      <label class="row check"><input id="nightEnabled" type="checkbox"><span>Black out the screen at night (tap to wake for a minute)</span></label>
+      <label class="row"><span>Starts at hour (0-23)</span><input id="nightStart" type="number" min="0" max="23"></label>
+      <label class="row"><span>Ends at hour (0-23)</span><input id="nightEnd" type="number" min="0" max="23"></label>
+    </section>
+
+    <div class="actions">
+      <button id="save" class="primary">Save</button>
+      <button id="reset" class="danger">Reset to defaults</button>
+    </div>
+    <p id="message" role="status"></p>
+  </main>
+
+  <script src="shared.js"></script>
+  <script src="settings.js"></script>
+</body>
+</html>

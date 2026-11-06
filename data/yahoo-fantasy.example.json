@@ -1,0 +1,7 @@
+{
+  "updated": "2026-11-06T12:00:00Z",
+  "week": 9,
+  "matchups": [
+    { "home": { "name": "Turf Titans", "points": 101.4 }, "away": { "name": "Example Team", "points": 88.2 } }
+  ]
+}
