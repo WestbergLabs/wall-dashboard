@@ -3,3 +3,5 @@
 node_modules/
 data/yahoo-fantasy.json
 scripts/kiosk.env
+__pycache__/
+*.pyc
