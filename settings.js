@@ -99,6 +99,7 @@ function fillForm() {
   const f = w.fantasy || {};
   $("fantasyProvider").value = f.provider || "none";
   $("yahooReloadMinutes").value = f.yahooReloadMinutes || 60;
+  $("liveSeconds").value = f.liveSeconds || 20;
   $("sleeperLeagueId").value = f.sleeperLeagueId || "";
   $("autoHideOffSeason").checked = !!f.autoHideOffSeason;
   $("seasonStart").value = f.seasonStart || "";
@@ -141,6 +142,8 @@ function readForm() {
     fantasy: {
       provider: $("fantasyProvider").value,
       yahooReloadMinutes: Math.min(720, Math.max(5, numberOr($("yahooReloadMinutes").value, 60))),
+      liveSeconds: Math.min(120, Math.max(5, numberOr($("liveSeconds").value, 20))),
+      myTeamName: f.myTeamName || "",
       controllerUrl: f.controllerUrl || "http://127.0.0.1:8081",
       sleeperLeagueId: $("sleeperLeagueId").value.trim(),
       autoHideOffSeason: $("autoHideOffSeason").checked,

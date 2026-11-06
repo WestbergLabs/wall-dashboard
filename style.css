@@ -197,3 +197,40 @@ html, body {
 }
 
 #gear:hover { opacity: 0.8; }
+
+/* Yahoo live matchup */
+#fantasy-body:has(.lv) { max-height: 86vh; }
+
+.lv { width: 100%; }
+.lv-head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 2vw; }
+.lv-teamcol.r { text-align: right; }
+.lv-team { font-size: 2.8vmin; color: var(--muted); }
+.lv-total { font-size: 8vmin; font-weight: 500; font-variant-numeric: tabular-nums; line-height: 1.05; }
+.lv-vs { color: var(--muted); font-size: 2.4vmin; padding-bottom: 1vh; }
+
+.lv-bar { height: 8px; border-radius: 4px; background: #2a313c; margin: 1.2vh 0 1.6vh; overflow: hidden; }
+.lv-bar > div { height: 100%; width: 50%; background: var(--accent); transition: width 0.8s ease; }
+
+.lv-row {
+  display: grid;
+  grid-template-columns: 1fr 7vmin 1fr;
+  align-items: center;
+  gap: 1vw;
+  background: var(--card);
+  border-radius: 10px;
+  padding: 0.6vh 1.4vw;
+  margin-bottom: 0.5vh;
+  transition: background 0.8s ease;
+}
+
+.lv-row.flash { background: #2a3544; transition: background 0.15s ease; }
+.lv-side { display: flex; align-items: center; gap: 1.2vw; min-width: 0; }
+.lv-side.r { flex-direction: row-reverse; text-align: right; }
+.lv-info { flex: 1; min-width: 0; line-height: 1.2; }
+.lv-name { font-size: 2.6vmin; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lv-sub { font-size: 1.8vmin; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lv-sub .live { color: var(--good); }
+.lv-pts { font-size: 3vmin; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 9vmin; text-align: right; }
+.lv-side.r .lv-pts { text-align: left; }
+.lv-slot { color: var(--muted); font-size: 1.8vmin; text-align: center; }
+.lv-stamp { color: var(--muted); font-size: 1.6vmin; text-align: right; margin-top: 0.6vh; }

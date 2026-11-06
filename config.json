@@ -30,6 +30,8 @@
     "provider": "yahoo-page",
     "controllerUrl": "http://127.0.0.1:8081",
     "yahooReloadMinutes": 60,
+    "liveSeconds": 20,
+    "myTeamName": "Turf Titans",
     "yahooDataUrl": "data/yahoo-fantasy.json",
     "sleeperLeagueId": "",
     "autoHideOffSeason": true,

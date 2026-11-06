@@ -53,12 +53,15 @@
       <h2>Fantasy</h2>
       <label class="row"><span>Provider</span>
         <select id="fantasyProvider">
+          <option value="yahoo-live">Yahoo live, redrawn (reads your signed-in page)</option>
           <option value="yahoo-page">Yahoo matchup page (tablet stays signed in)</option>
           <option value="yahoo">Yahoo data file (data/yahoo-fantasy.json)</option>
           <option value="sleeper">Sleeper</option>
           <option value="none">None</option>
         </select>
       </label>
+      <label class="row"><span>Live refresh (seconds)</span><input id="liveSeconds" type="number" min="5" max="120"></label>
+      <p class="hint">Yahoo live reads the signed-in page through the browser. That is automated access, which Yahoo's terms prohibit.</p>
       <label class="row"><span>Safety reload of the Yahoo page (minutes)</span><input id="yahooReloadMinutes" type="number" min="5" max="720"></label>
       <p class="hint">The Yahoo page updates itself during games, so this only reopens it if it has been up that long.</p>
       <label class="row"><span>Sleeper league ID</span><input id="sleeperLeagueId" type="text" inputmode="numeric"></label>

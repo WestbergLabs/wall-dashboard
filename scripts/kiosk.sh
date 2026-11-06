@@ -27,6 +27,7 @@ python3 "$DIR/scripts/tab_controller.py" \
   --debug-port "$DEBUG_PORT" \
   --listen-port "$CONTROLLER_PORT" \
   --dashboard-origin "http://127.0.0.1:${PORT}" \
+  --captures-dir "$DIR/captures" \
   --yahoo-url "$YAHOO_URL" >/dev/null 2>&1 &
 CONTROLLER_PID=$!
 

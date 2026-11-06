@@ -201,6 +201,120 @@ async function refreshFantasy() {
   }
 }
 
+/* ---------- Yahoo live: matchup redrawn from the hidden Yahoo tab ---------- */
+
+const liveShown = { rows: [], left: 0, right: 0 };
+
+function liveStatus(info, actual) {
+  const text = info || "";
+  if (/final/i.test(text)) return "final";
+  if (/^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)\b/i.test(text) || /^\d{1,2}:\d{2}\s?(AM|PM)/i.test(text)) return "up";
+  return actual === null || actual === undefined ? "up" : "live";
+}
+
+function tweenText(node, from, to) {
+  const start = performance.now();
+  function frame(now) {
+    const k = Math.min(1, (now - start) / 700);
+    node.textContent = (from + (to - from) * k).toFixed(2);
+    if (k < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+function pointsText(value) {
+  return typeof value === "number" ? value.toFixed(2) : "\u2014";
+}
+
+function buildLiveDom(count) {
+  const body = $("fantasy-body");
+  body.replaceChildren();
+  const root = el("div", "lv");
+
+  const head = el("div", "lv-head");
+  const left = el("div", "lv-teamcol");
+  left.append(el("div", "lv-team lv-nameL", ""), el("div", "lv-total lv-totL", "0.00"));
+  const right = el("div", "lv-teamcol r");
+  right.append(el("div", "lv-team lv-nameR", ""), el("div", "lv-total lv-totR", "0.00"));
+  head.append(left, el("div", "lv-vs", "vs"), right);
+
+  const bar = el("div", "lv-bar");
+  bar.append(el("div", ""));
+
+  root.append(head, bar);
+  for (let i = 0; i < count; i++) {
+    const row = el("div", "lv-row");
+    const mk = (cls) => {
+      const side = el("div", "lv-side " + cls);
+      const info = el("div", "lv-info");
+      info.append(el("div", "lv-name", ""), el("div", "lv-sub", ""));
+      side.append(info, el("div", "lv-pts", "\u2014"));
+      return side;
+    };
+    row.append(mk("l"), el("div", "lv-slot", ""), mk("r"));
+    root.append(row);
+  }
+  root.append(el("div", "lv-stamp", ""));
+  body.append(root);
+  liveShown.rows = [];
+  liveShown.left = 0;
+  liveShown.right = 0;
+  return root;
+}
+
+function renderLive(data, ageSeconds) {
+  const rows = (data.rows || []).filter((r) => r.slot !== "BN" && r.slot !== "IR");
+  const f = settings.fantasy || {};
+  let root = $("fantasy-body").querySelector(".lv");
+  if (!root || root.querySelectorAll(".lv-row").length !== rows.length) root = buildLiveDom(rows.length);
+
+  const teams = data.teams || [];
+  root.querySelector(".lv-nameL").textContent = (teams[0] && teams[0].name) || f.myTeamName || "Your team";
+  root.querySelector(".lv-nameR").textContent = (teams[1] && teams[1].name) || "Opponent";
+
+  const rowEls = root.querySelectorAll(".lv-row");
+  let sumL = 0, sumR = 0;
+  rows.forEach((r, i) => {
+    const rowEl = rowEls[i];
+    rowEl.querySelector(".lv-slot").textContent = r.slot;
+    [["l", r.left], ["r", r.right]].forEach(([cls, p]) => {
+      const side = rowEl.querySelector(".lv-side." + cls);
+      side.querySelector(".lv-name").textContent = p.name || "Empty";
+      const status = liveStatus(p.info, p.actual);
+      const sub = side.querySelector(".lv-sub");
+      sub.replaceChildren();
+      sub.append(document.createTextNode((p.team ? p.team + " \u00B7 " : "")));
+      const tag = el("span", status === "live" ? "live" : "", status === "live" ? "Live" : status === "final" ? "Final" : (p.info || "Upcoming"));
+      sub.append(tag);
+
+      const ptsEl = side.querySelector(".lv-pts");
+      const key = i + cls;
+      const before = liveShown.rows[key];
+      if (typeof p.actual === "number" && typeof before === "number" && p.actual !== before) {
+        tweenText(ptsEl, before, p.actual);
+        rowEl.classList.add("flash");
+        setTimeout(() => rowEl.classList.remove("flash"), 900);
+      } else {
+        ptsEl.textContent = pointsText(p.actual);
+      }
+      liveShown.rows[key] = typeof p.actual === "number" ? p.actual : null;
+    });
+    sumL += Number(r.left.actual) || 0;
+    sumR += Number(r.right.actual) || 0;
+  });
+
+  tweenText(root.querySelector(".lv-totL"), liveShown.left, sumL);
+  tweenText(root.querySelector(".lv-totR"), liveShown.right, sumR);
+  liveShown.left = sumL;
+  liveShown.right = sumR;
+  root.querySelector(".lv-bar > div").style.width = (sumL + sumR > 0 ? (100 * sumL) / (sumL + sumR) : 50).toFixed(1) + "%";
+
+  const stamp = root.querySelector(".lv-stamp");
+  const age = Number(ageSeconds) || 0;
+  stamp.textContent = (data.week ? "Week " + data.week + " \u00B7 " : "") +
+    (age > 90 ? "updated " + Math.round(age / 60) + " min ago" : "live");
+}
+
 function controllerUrl(f) {
   return (f.controllerUrl || "http://127.0.0.1:8081").replace(/\/$/, "");
 }
@@ -225,7 +339,16 @@ async function loadFantasy() {
   if (f.autoHideOffSeason && !inSeason(f.seasonStart, f.seasonEnd)) return;
 
   try {
-    if (f.provider === "yahoo-page") {
+    if (f.provider === "yahoo-live") {
+      const url = controllerUrl(f) + "/matchup?poll=" + (Number(f.liveSeconds) || 20) +
+        "&reload=" + (Number(f.yahooReloadMinutes) || 60);
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) return;
+      const body = await res.json();
+      if (!body.ok || !body.data || !body.data.rows || !body.data.rows.length) return;
+      renderLive(body.data, body.ageSeconds);
+      state.fantasyReady = true;
+    } else if (f.provider === "yahoo-page") {
       // The kiosk's tab controller flips the browser to your signed-in Yahoo matchup page
       // while this screen is up. The controller only answers on the kiosk, so on any other
       // browser this screen stays out of the rotation.
@@ -352,7 +475,13 @@ async function init() {
 
   every((settings.weather || {}).refreshMinutes, refreshWeather);
   every((settings.scores || {}).refreshMinutes, refreshScores);
-  every((settings.fantasy || {}).refreshMinutes, refreshFantasy);
+  const fantasyCfg = settings.fantasy || {};
+  if (fantasyCfg.provider === "yahoo-live") {
+    refreshFantasy();
+    setInterval(refreshFantasy, Math.max(5, Number(fantasyCfg.liveSeconds) || 20) * 1000);
+  } else {
+    every(fantasyCfg.refreshMinutes, refreshFantasy);
+  }
 
   step(1);
 }

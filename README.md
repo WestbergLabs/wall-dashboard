@@ -43,6 +43,19 @@ Setup on the tablet:
 3. With the kiosk not running, run `scripts/yahoo-login.sh`, sign in to Yahoo, tick "Stay signed in", and close the window. The sign-in is kept in the dashboard's own browser profile.
 4. Start `scripts/kiosk.sh`.
 
+### Yahoo live, redrawn (provider `yahoo-live`)
+
+This option draws the matchup in the dashboard's own style instead of showing Yahoo's page. The controller keeps your signed-in Yahoo matchup page open in a background tab, reads the visible text through Chrome's local debugging port every `liveSeconds` (default 20), and the dashboard animates the changes (counting points, flashing the row that moved). Yahoo updates that tab by itself during games, with a safety reload every `yahooReloadMinutes`.
+
+Terms note: this is automated reading of a Yahoo page, which Yahoo's terms prohibit. It reads only your own signed-in matchup, only on this tablet, and never sends anything off the device, but the risk is yours. The `yahoo-page` provider above is the compliant alternative.
+
+The reader (`scripts/extractors/yahoo-matchup.js`) is version 0 and has not been checked against the real page. To fit it:
+1. Start the kiosk with the provider set to `yahoo-live` and let the Yahoo tab load.
+2. Run `scripts/capture.sh`. It saves the page HTML, text and a screenshot into `captures/` (git-ignored; it may contain your account name).
+3. Share those files and the extractor gets adjusted to match.
+
+Until then, the Fantasy screen stays out of the rotation if nothing could be read.
+
 Other providers still exist as options on the settings page: a Yahoo data file (`data/yahoo-fantasy.json`, schema in `data/yahoo-fantasy.example.json`) and the Sleeper read-only API.
 
 ## Run it on a PC to try it
