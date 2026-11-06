@@ -58,14 +58,14 @@ Other providers still exist as options on the settings page: a Yahoo data file (
 
 One supported setup: **Ubuntu Desktop 24.04 LTS** with Google Chrome. Takes about 15 minutes, most of it the OS install.
 
-1. **Install Ubuntu Desktop 24.04 LTS** on the tablet from a USB stick (https://ubuntu.com/download/desktop). Create a user named `dashboard`, connect to Wi-Fi, and finish the installer.
+1. **Install Ubuntu Desktop 24.04 LTS** on the tablet from a USB stick (https://ubuntu.com/download/desktop). Create your user (any name and password), connect to Wi-Fi, and finish the installer.
 2. **Get the code and run setup.** Open a terminal on the tablet:
    ```bash
    sudo apt-get install -y git
    git clone https://github.com/WestbergLabs/wall-dashboard.git ~/wall-dashboard
    ~/wall-dashboard/scripts/setup.sh
    ```
-   Run it as the `dashboard` user, not with `sudo`. It asks for your password only to install packages and turn on automatic login.
+   Run it as that user, not with `sudo`. It asks for your password only to install packages and turn on automatic login.
 3. **Answer three questions.**
    - Your Yahoo matchup page address (open the Matchup page in any browser and copy it).
    - Fantasy mode: `1` show Yahoo's page, `2` redraw it in the dashboard style, `3` no Fantasy screen.
