@@ -3,6 +3,7 @@
 /*
  * Settings model
  *   config.json  = shipped defaults (committed to git)
+ *   config.local.json = optional defaults for this machine (git-ignored, written by setup.sh)
  *   localStorage = per-device overrides saved by settings.html
  * The dashboard and the settings page both call loadSettings() to get the merged result.
  */
@@ -49,7 +50,15 @@ function clearOverrides() {
 async function loadDefaults() {
   const res = await fetch("config.json", { cache: "no-store" });
   if (!res.ok) throw new Error("config.json -> HTTP " + res.status);
-  return res.json();
+  const base = await res.json();
+  // Optional machine-specific defaults written by scripts/setup.sh (git-ignored).
+  try {
+    const local = await fetch("config.local.json", { cache: "no-store" });
+    if (local.ok) return deepMerge(base, await local.json());
+  } catch (err) {
+    /* no local file, use the shipped defaults */
+  }
+  return base;
 }
 
 async function loadSettings() {

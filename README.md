@@ -37,11 +37,7 @@ How it behaves:
 - It also stays out of the rotation outside the season window, and during night mode the tab is not shown.
 - Tapping inside the Yahoo page works, but the dashboard does not get your taps while Yahoo is in front.
 
-Setup on the tablet:
-1. Copy `scripts/kiosk.env.example` to `scripts/kiosk.env`.
-2. Open your league's Matchup page in a browser, copy its address, and put it in `YAHOO_MATCHUP_URL`. The default is a best guess from the league ID.
-3. With the kiosk not running, run `scripts/yahoo-login.sh`, sign in to Yahoo, tick "Stay signed in", and close the window. The sign-in is kept in the dashboard's own browser profile.
-4. Start `scripts/kiosk.sh`.
+Setup of the Yahoo address and sign-in is covered by `scripts/setup.sh` (see Quick start). To do it by hand, copy `scripts/kiosk.env.example` to `scripts/kiosk.env`, set `YAHOO_MATCHUP_URL`, and run `scripts/yahoo-login.sh` once with the kiosk closed.
 
 ### Yahoo live, redrawn (provider `yahoo-live`)
 
@@ -58,24 +54,48 @@ Until then, the Fantasy screen stays out of the rotation if nothing could be rea
 
 Other providers still exist as options on the settings page: a Yahoo data file (`data/yahoo-fantasy.json`, schema in `data/yahoo-fantasy.example.json`) and the Sleeper read-only API.
 
-## Run it on a PC to try it
+## Quick start (tablet)
+
+Takes about 15 minutes, most of it the operating system install.
+
+1. **Install Linux.** Ubuntu Desktop or Debian with GNOME works. Create a normal user (for example `dashboard`), connect to Wi-Fi, and turn on automatic login in the desktop's user settings.
+2. **Get the code and run setup.** Open a terminal on the tablet:
+   ```bash
+   sudo apt-get install -y git
+   git clone https://github.com/WestbergLabs/wall-dashboard.git ~/wall-dashboard
+   ~/wall-dashboard/scripts/setup.sh
+   ```
+   Run it as your normal user, not with `sudo`. It asks for your password only to install packages.
+3. **Answer three questions.**
+   - Your Yahoo matchup page address (open the Matchup page in any browser and copy it).
+   - Fantasy mode: `1` show Yahoo's page, `2` redraw it in the dashboard style, `3` no Fantasy screen.
+   - Whether to open the Yahoo sign-in window now. Say `y`, sign in, tick "Stay signed in", check the matchup page loads, then close the window.
+4. **Test it.** Run `~/wall-dashboard/scripts/kiosk.sh`. Leave kiosk mode with Alt+F4.
+5. **Reboot.** The dashboard starts by itself after login.
+
+What setup does: installs Python, git and Chrome (Chromium on Debian, Google Chrome on Ubuntu because Ubuntu's Chromium is a snap that blocks the profile folder), writes `scripts/kiosk.env` and `config.local.json` (both git-ignored), adds a login autostart entry, and turns off screen sleep. It is safe to run again. Use `--no-install` to skip packages.
+
+Day to day:
+- Settings: tap the gear icon (screens, order, seconds, weather, leagues, fantasy mode, night mode).
+- Tap the right half of the screen for the next screen, the left half for the previous one.
+- Update: `cd ~/wall-dashboard && git pull`, then reboot.
+- Change the Yahoo address later: edit `scripts/kiosk.env`.
+- Sign in to Yahoo again: close the kiosk and run `scripts/yahoo-login.sh`.
+
+If something looks wrong:
+- Fantasy screen missing: it only appears when the Yahoo tab is reachable, the date is inside the season window, and, for the redraw mode, the page could be read. See the capture steps above.
+- Blank or wrong layout: check that nothing else uses port 8080, 8081 or 9222 (settings are tied to the address `127.0.0.1:8080`).
+
+## Try it on a PC
 
 ```bash
-python3 -m http.server 8080
-# open http://localhost:8080
+python3 -m http.server 8080 --bind 127.0.0.1
+# open http://127.0.0.1:8080
 ```
 
-A local server is needed because the page loads `config.json` with `fetch()`. Keep the same address on the tablet (the kiosk script uses port 8080), because saved settings are tied to the address.
+A local server is needed because the page loads `config.json` with `fetch()`. Fantasy stays out on a PC unless the kiosk controller is running.
 
-## Set up the tablet (Linux)
-
-1. Install Debian or Ubuntu, create a user named `dashboard`, and enable automatic login.
-2. Install the pieces: `sudo apt install chromium python3 git` (the package may be named `chromium-browser` on Ubuntu).
-3. Clone this repo into `/home/dashboard/wall-dashboard`.
-4. Set up the Yahoo sign-in first (see the Fantasy section above), then test with `scripts/kiosk.sh`.
-5. To start on boot, copy `scripts/wall-dashboard.service` to `/etc/systemd/system/`, adjust the user and path, then `sudo systemctl enable --now wall-dashboard`.
-
-On an old tablet battery: if the case bulges or the battery is swollen, do not leave it charging around the clock.
+Old tablet batteries: if the case bulges or the battery is swollen, do not leave it charging around the clock.
 
 ## Ideas for later
 
