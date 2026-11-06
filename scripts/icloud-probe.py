@@ -47,30 +47,52 @@ def main():
         print(__doc__)
         return 2
     token = token_from(sys.argv[1])
-    host = "p%02d-sharedstreams.icloud.com" % partition(token)
-    print("token length:", len(token), "first guess host:", host)
-    if partition(token) > 99:
-        print("note: this token does not fit the older album address scheme (server number %d), so the older method may not apply" % partition(token))
-    for attempt in range(3):
-        status, headers, body = post("https://%s/%s/sharedstreams/webstream" % (host, token), {"streamCtag": None})
-        print("attempt", attempt + 1, "status", status)
-        redirect = headers.get("X-Apple-MMe-Host")
-        if status == 330 and redirect and redirect.endswith(".icloud.com"):
-            host = redirect
-            print("redirected to", host)
-            continue
-        break
+    print("token length:", len(token))
+    hosts = ["sharedstreams.icloud.com"]
+    if partition(token) <= 99:
+        hosts.append("p%02d-sharedstreams.icloud.com" % partition(token))
+    else:
+        print("note: the older server-number scheme does not fit this token, so only the generic address is tried")
+
+    host, status, headers, body = None, None, {}, b""
+    for first in hosts:
+        host = first
+        for attempt in range(4):
+            status, headers, body = post("https://%s/%s/sharedstreams/webstream" % (host, token), {"streamCtag": None})
+            print("POST", host, "-> status", status)
+            redirect = headers.get("X-Apple-MMe-Host")
+            if status == 330 and redirect and redirect.endswith(".icloud.com"):
+                host = redirect
+                print("  redirected to", host)
+                continue
+            break
+        if status == 200:
+            break
+
     text = body.decode("utf-8", "replace")
     try:
         data = json.loads(text)
-        photos = data.get("photos", [])
-        print("album name:", data.get("streamName"))
-        print("photos listed:", len(photos))
-        print("keys of first photo:", sorted(photos[0].keys()) if photos else None)
-        print("RESULT: readable" if photos else "RESULT: answered but no photos")
     except ValueError:
         print("RESULT: not readable this way")
         print("first 300 characters of the reply:", text[:300])
+        return 0
+    photos = data.get("photos", [])
+    print("album name:", data.get("streamName"))
+    print("photos listed:", len(photos))
+    if not photos:
+        print("RESULT: answered but no photos")
+        return 0
+    first = photos[0]
+    print("keys of first photo:", sorted(first.keys()))
+    print("derivative sizes:", sorted((first.get("derivatives") or {}).keys()))
+    status, _, body = post("https://%s/%s/sharedstreams/webasseturls" % (host, token), {"photoGuids": [first.get("photoGuid")]})
+    print("POST webasseturls -> status", status)
+    try:
+        items = json.loads(body.decode("utf-8", "replace")).get("items", {})
+        print("download links returned:", len(items))
+        print("RESULT: readable" if items else "RESULT: list readable, but no download links")
+    except ValueError:
+        print("RESULT: list readable, but download links failed")
     return 0
 
 
