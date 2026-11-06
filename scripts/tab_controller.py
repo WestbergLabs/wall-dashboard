@@ -56,6 +56,9 @@ class Browser:
         self.live_thread = None
         self.poll_seconds = 20
         self.reload_minutes = 60
+        self.auto_captures = 0
+        self.last_auto_capture = 0.0
+        self.polls = 0
 
     # --- Chrome DevTools HTTP endpoints ---
 
@@ -161,10 +164,34 @@ class Browser:
                     self.latest = value
                     self.latest_at = time.time()
                     self.latest_error = None
+                self._maybe_auto_capture(bool(value and value.get("ok")))
             except Exception as err:
                 with self.lock:
                     self.latest_error = str(err)
+                self._maybe_auto_capture(False)
             time.sleep(self.poll_seconds)
+
+    def _maybe_auto_capture(self, parsed):
+        """Save a capture by itself so nobody has to run capture.sh.
+
+        One capture on the third poll (the page has had time to load), then another only when
+        the page could not be read, at most every 6 hours and 5 per run.
+        """
+        self.polls += 1
+        if not self.captures_dir or self.auto_captures >= 5:
+            return
+        now = time.time()
+        first = self.auto_captures == 0 and self.polls >= 3
+        retry = (not parsed) and self.polls >= 3 and now - self.last_auto_capture > 6 * 3600
+        if not (first or retry):
+            return
+        try:
+            self.capture(prefix="auto")
+            self.auto_captures += 1
+            self.last_auto_capture = now
+        except Exception as err:
+            with self.lock:
+                self.latest_error = "auto capture failed: %s" % err
 
     def start_live(self, poll_seconds, reload_minutes):
         with self.lock:
@@ -185,7 +212,7 @@ class Browser:
                 "error": self.latest_error,
             }
 
-    def capture(self):
+    def capture(self, prefix="matchup"):
         if not self.captures_dir:
             raise RuntimeError("captures directory is not configured")
         tab_id = self._ensure_background_yahoo()
@@ -195,7 +222,7 @@ class Browser:
         page = json.loads(self._evaluate_in(tab_id, "JSON.stringify({url: location.href, title: document.title, "
                                                     "html: document.documentElement.outerHTML, text: document.body.innerText})"))
         for suffix, key in (("html", "html"), ("txt", "text")):
-            path = os.path.join(self.captures_dir, "matchup-%s.%s" % (stamp, suffix))
+            path = os.path.join(self.captures_dir, "%s-%s.%s" % (prefix, stamp, suffix))
             with open(path, "w", encoding="utf-8") as handle:
                 handle.write(page[key])
             files.append(path)
@@ -203,13 +230,22 @@ class Browser:
             tab = self._tab_by_id(tab_id)
             with CDP(tab["webSocketDebuggerUrl"]) as cdp:
                 shot = cdp.call("Page.captureScreenshot", {"format": "png"})
-            path = os.path.join(self.captures_dir, "matchup-%s.png" % stamp)
+            path = os.path.join(self.captures_dir, "%s-%s.png" % (prefix, stamp))
             import base64
             with open(path, "wb") as handle:
                 handle.write(base64.b64decode(shot["data"]))
             files.append(path)
         except Exception:
             pass  # a screenshot is a nice extra, not required
+        # One zip with everything saved so far, easy to attach or copy.
+        try:
+            import zipfile
+            with zipfile.ZipFile(os.path.join(self.captures_dir, "captures.zip"), "w", zipfile.ZIP_DEFLATED) as bundle:
+                for name in sorted(os.listdir(self.captures_dir)):
+                    if name != "captures.zip":
+                        bundle.write(os.path.join(self.captures_dir, name), name)
+        except Exception:
+            pass
         return {"files": files, "url": page["url"], "title": page["title"]}
 
 

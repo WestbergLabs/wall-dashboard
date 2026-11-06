@@ -94,10 +94,7 @@ This option draws the matchup in the dashboard's own style instead of showing Ya
 
 Terms note: this is automated reading of a Yahoo page, which Yahoo's terms prohibit. It reads only your own signed-in matchup, only on this tablet, and never sends anything off the device, but the risk is yours. The `yahoo-page` provider above is the compliant alternative.
 
-The reader (`scripts/extractors/yahoo-matchup.js`) is version 0 and has not been checked against the real page. To fit it:
-1. Start the kiosk with the provider set to `yahoo-live` and let the Yahoo tab load.
-2. Run `scripts/capture.sh`. It saves the page HTML, text and a screenshot into `captures/` (git-ignored; it may contain your account name).
-3. Share those files and the extractor gets adjusted to match.
+The reader (`scripts/extractors/yahoo-matchup.js`) is version 0 and has not been checked against the real page. Nothing needs to be run to fit it: in this mode the controller saves a capture by itself about a minute after start (page HTML, text and a screenshot), and again if the page cannot be read (at most every 6 hours, 5 per run). Everything is in `captures/` and bundled as `captures/captures.zip`. Attach that zip to the chat and the reader gets adjusted to match. The files are git-ignored and may contain your account name, so look them over first. `scripts/capture.sh` still takes one on demand.
 
 Until then, the Fantasy screen stays out of the rotation if nothing could be read.
 
