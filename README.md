@@ -2,6 +2,55 @@
 
 A rotating full-screen dashboard for an old tablet or mini PC: clock, weather, sports scores and fantasy football matchups. Static HTML, CSS and JavaScript with no build step and no API keys.
 
+## Quick start (tablet)
+
+One supported setup: **Ubuntu Desktop 24.04 LTS** with Google Chrome. About 15 minutes, most of it the OS install. You need a USB stick (8 GB or more), a keyboard for the tablet, Wi-Fi, and your Yahoo login.
+
+**Step 1. Install Ubuntu.**
+1. On another computer, download Ubuntu Desktop 24.04 LTS from https://ubuntu.com/download/desktop and write it to the USB stick with Rufus (Windows) or balenaEtcher.
+2. Boot the tablet from the stick. Choose "Install Ubuntu", accept the defaults, and let it erase the disk.
+3. When asked to create a user, pick any name and password. Remember the password, setup asks for it.
+4. Connect to Wi-Fi when asked, finish, and restart. Remove the stick.
+
+**Step 2. Download and run setup.** On the tablet, open Terminal (Ctrl+Alt+T) and paste these three lines one at a time:
+
+```bash
+sudo apt-get install -y git
+git clone https://github.com/WestbergLabs/wall-dashboard.git ~/wall-dashboard
+~/wall-dashboard/scripts/setup.sh
+```
+
+Do not put `sudo` in front of the third line. If the repository is private, `git clone` asks for your GitHub username and a personal access token as the password.
+
+**Step 3. Answer the questions.** Press Enter to accept the value in brackets.
+1. *Yahoo matchup page address.* On any device, open your league's Matchup page, copy the address from the browser bar, and paste it here. Enter accepts the default, which is a guess and may be wrong.
+2. *Fantasy mode.* `1` shows Yahoo's own page on the Fantasy screen. `2` redraws the matchup in the dashboard style (it reads the page automatically, which Yahoo's terms prohibit, see below). `3` turns the Fantasy screen off.
+3. *Open the Yahoo sign-in now?* Type `y`. A Chrome window opens. Sign in to Yahoo, tick "Stay signed in", make sure the matchup page shows, then close the window. Skip Chrome's own sign-in prompts. Type `n` for fantasy mode 3.
+
+Setup then finishes with a summary. It installs Python, git and Google Chrome, turns on automatic login, adds the dashboard to login startup, turns off screen sleep, and saves your answers in `scripts/kiosk.env` and `config.local.json` (both git-ignored). It is safe to run again.
+
+**Step 4. Test.** Run `~/wall-dashboard/scripts/kiosk.sh`. The dashboard fills the screen. Press Alt+F4 to leave. If the Fantasy screen does not show up, see Troubleshooting.
+
+**Step 5. Reboot.** The tablet logs in by itself and the dashboard starts. This is the finished state.
+
+### Day to day
+
+- Settings: tap the faint gear in the top-right corner.
+- Next or previous screen: tap the right or left half of the screen.
+- Update: open Terminal, run `cd ~/wall-dashboard && git pull`, then reboot.
+- Change the Yahoo address: edit `~/wall-dashboard/scripts/kiosk.env`, then reboot.
+- Sign in to Yahoo again: close the kiosk (Alt+F4), run `~/wall-dashboard/scripts/yahoo-login.sh`, sign in, close the window, then reboot.
+- Change the fantasy mode: gear icon, Fantasy provider.
+
+### Troubleshooting
+
+- **Fantasy screen missing.** It only appears when all of these are true: the Yahoo tab is reachable, today is inside the season window (settings, default 09-01 to 01-15), it is not night mode, and in redraw mode the page could be read (see "Yahoo live, redrawn").
+- **Yahoo shows a sign-in page.** Run the sign-in step again (see Day to day).
+- **Blank screen or settings not remembered.** Check that nothing else uses ports 8080, 8081 or 9222. Saved settings are tied to the address `127.0.0.1:8080`.
+- **Start over.** Delete `scripts/kiosk.env` and `config.local.json`, then run `~/wall-dashboard/scripts/setup.sh` again.
+
+Old tablet batteries: if the case bulges or the battery is swollen, do not leave it charging around the clock.
+
 ## Screens
 
 | Screen  | Source | Notes |
@@ -30,14 +79,14 @@ Open `settings.html` (the gear icon). Settings are saved on that device in the b
 
 Yahoo's API access is not available to us, so the Fantasy screen simply shows your own Yahoo matchup page. On the tablet, Chrome keeps two tabs: the dashboard and your signed-in Yahoo matchup page. When the rotation reaches Fantasy, `scripts/tab_controller.py` brings the Yahoo tab to the front for that screen's seconds and then returns to the dashboard. The Yahoo page updates itself live during games, so the dashboard only reopens it as a safety net (default every 60 minutes).
 
-Nothing reads, scrapes or changes the Yahoo page. The tablet just displays it in a normal browser, because Yahoo's terms prohibit automated data collection. The fantasy on/off, order, seconds and off-season settings all apply to it like any other screen.
+In this mode (`yahoo-page`) nothing reads, scrapes or changes the Yahoo page. The tablet just displays it in a normal browser, because Yahoo's terms prohibit automated data collection. The fantasy on/off, order, seconds and off-season settings all apply to it like any other screen.
 
 How it behaves:
 - The Fantasy screen only joins the rotation when the controller answers, so on a regular PC or browser it stays out.
 - It also stays out of the rotation outside the season window, and during night mode the tab is not shown.
 - Tapping inside the Yahoo page works, but the dashboard does not get your taps while Yahoo is in front.
 
-Setup of the Yahoo address and sign-in is covered by `scripts/setup.sh` (see Quick start). To do it by hand, copy `scripts/kiosk.env.example` to `scripts/kiosk.env`, set `YAHOO_MATCHUP_URL`, and run `scripts/yahoo-login.sh` once with the kiosk closed.
+The Yahoo address and sign-in are handled by `scripts/setup.sh` (see Quick start). To do it by hand, copy `scripts/kiosk.env.example` to `scripts/kiosk.env`, set `YAHOO_MATCHUP_URL`, and run `scripts/yahoo-login.sh` once with the kiosk closed.
 
 ### Yahoo live, redrawn (provider `yahoo-live`)
 
@@ -54,38 +103,6 @@ Until then, the Fantasy screen stays out of the rotation if nothing could be rea
 
 Other providers still exist as options on the settings page: a Yahoo data file (`data/yahoo-fantasy.json`, schema in `data/yahoo-fantasy.example.json`) and the Sleeper read-only API.
 
-## Quick start (tablet)
-
-One supported setup: **Ubuntu Desktop 24.04 LTS** with Google Chrome. Takes about 15 minutes, most of it the OS install.
-
-1. **Install Ubuntu Desktop 24.04 LTS** on the tablet from a USB stick (https://ubuntu.com/download/desktop). Create your user (any name and password), connect to Wi-Fi, and finish the installer.
-2. **Get the code and run setup.** Open a terminal on the tablet:
-   ```bash
-   sudo apt-get install -y git
-   git clone https://github.com/WestbergLabs/wall-dashboard.git ~/wall-dashboard
-   ~/wall-dashboard/scripts/setup.sh
-   ```
-   Run it as that user, not with `sudo`. It asks for your password only to install packages and turn on automatic login.
-3. **Answer three questions.**
-   - Your Yahoo matchup page address (open the Matchup page in any browser and copy it).
-   - Fantasy mode: `1` show Yahoo's page, `2` redraw it in the dashboard style, `3` no Fantasy screen.
-   - Whether to open the Yahoo sign-in window now. Say `y`, sign in, tick "Stay signed in", check the matchup page loads, then close the window.
-4. **Test it.** Run `~/wall-dashboard/scripts/kiosk.sh`. Leave kiosk mode with Alt+F4.
-5. **Reboot.** The tablet logs in by itself and the dashboard starts.
-
-What setup does: installs Python, git and Google Chrome, turns on automatic login, writes `scripts/kiosk.env` and `config.local.json` (both git-ignored), adds a login autostart entry, and turns off screen sleep. It is safe to run again. 
-
-Day to day:
-- Settings: tap the gear icon (screens, order, seconds, weather, leagues, fantasy mode, night mode).
-- Tap the right half of the screen for the next screen, the left half for the previous one.
-- Update: `cd ~/wall-dashboard && git pull`, then reboot.
-- Change the Yahoo address later: edit `scripts/kiosk.env`.
-- Sign in to Yahoo again: close the kiosk and run `scripts/yahoo-login.sh`.
-
-If something looks wrong:
-- Fantasy screen missing: it only appears when the Yahoo tab is reachable, the date is inside the season window, and, for the redraw mode, the page could be read. See the capture steps above.
-- Blank or wrong layout: check that nothing else uses port 8080, 8081 or 9222 (settings are tied to the address `127.0.0.1:8080`).
-
 ## Try it on a PC
 
 ```bash
@@ -94,8 +111,6 @@ python3 -m http.server 8080 --bind 127.0.0.1
 ```
 
 A local server is needed because the page loads `config.json` with `fetch()`. Fantasy stays out on a PC unless the kiosk controller is running.
-
-Old tablet batteries: if the case bulges or the battery is swollen, do not leave it charging around the clock.
 
 ## Ideas for later
 
