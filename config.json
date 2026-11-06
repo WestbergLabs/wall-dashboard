@@ -14,6 +14,8 @@
     "latitude": 45.18,
     "longitude": -89.69,
     "units": "fahrenheit",
+    "scene": "auto",
+    "animate": true,
     "refreshMinutes": 15
   },
   "scores": {

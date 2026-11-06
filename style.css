@@ -226,3 +226,18 @@ html, body {
 .lv-stamp { color: var(--muted); font-size: 1.6vmin; text-align: right; margin-top: 0.6vh; }
 
 #weather-icon, .dicon { filter: var(--icon-filter); }
+
+/* Weather background */
+#weather-scene { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+#weather-scene svg { position: absolute; left: 0; width: 100%; }
+#weather-scene .sky { top: 0; height: 100%; }
+#weather-scene .land { bottom: 0; height: 34vh; }
+#screen-weather > :not(#weather-scene) { z-index: 1; }
+:root[data-theme="dark"] #screen-weather, :root:not([data-theme]) #screen-weather { --muted: #d3dce8; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35); }
+.cloud { animation: drift linear infinite; }
+@keyframes drift { from { transform: translateX(-260px); } to { transform: translateX(260px); } }
+.drop { animation: fall linear infinite; }
+.flake { animation: snow linear infinite; }
+@keyframes fall { from { transform: translateY(-30px); } to { transform: translateY(940px); } }
+@keyframes snow { from { transform: translate(0, -20px); } 50% { transform: translate(18px, 460px); } to { transform: translate(-10px, 940px); } }
+@media (prefers-reduced-motion: reduce) { .cloud, .drop, .flake { animation: none; } }

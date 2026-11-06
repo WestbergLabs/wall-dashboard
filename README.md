@@ -56,7 +56,7 @@ Old tablet batteries: if the case bulges or the battery is swollen, do not leave
 | Screen  | Source | Notes |
 |---------|--------|-------|
 | Clock   | Local time | 12 or 24 hour |
-| Weather | Open-Meteo | Current conditions plus a 4-day outlook, free, no key |
+| Weather | Open-Meteo | Current conditions plus a 4-day outlook over a drawn skyline. The sky follows sunrise, sunset and the weather. Auto picks a city or small-town skyline from the place's population. Free, no key |
 | Scores  | ESPN public scoreboard JSON | NFL, college football, NBA, NHL, MLB. Skipped automatically when there are no games |
 | Fantasy | Your Yahoo matchup page, shown by the tablet's browser (or a Yahoo data file, or Sleeper) | Hidden outside the season window and whenever it is not available |
 
@@ -69,7 +69,7 @@ Open `settings.html` (the gear icon). Settings are saved on that device in the b
 - turn each screen on or off, reorder them, and set seconds per screen (blank uses the default)
 - default seconds per screen
 - **theme**: Dark (default), Paper (off-white, black ink, no color, closest to e-ink) or Auto (paper by day, dark at night, hours adjustable); picking one previews it immediately
-- clock format, weather place, coordinates and units
+- clock format, weather place, coordinates and units, and the weather background (Auto, city, small town, lake, farmland or none) with rain, snow and cloud animation on or off
 - which sports leagues appear, and whether to skip Scores when nothing is playing
 - fantasy provider, how often the Yahoo page may be reopened, plus **Hide automatically in the off-season** with a start and end date (default 09-01 to 01-15)
 - night mode hours

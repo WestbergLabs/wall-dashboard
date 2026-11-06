@@ -80,17 +80,41 @@ function renderClock() {
 
 /* ---------- Weather ---------- */
 
+let sceneChoice = "town";
+
+async function updateWeatherScene() {
+  const w = settings.weather || {};
+  const data = state.weatherData;
+  const container = $("weather-scene");
+  if (!container || !data) return;
+  let scene = w.scene || "auto";
+  if (scene === "auto") scene = await guessScene(w);
+  sceneChoice = scene;
+  renderScene(container, {
+    scene,
+    theme: document.documentElement.getAttribute("data-theme"),
+    sky: skyState(data.current, data.daily, data.current.weather_code),
+    seed: w.name || "home",
+    animate: w.animate !== false
+  });
+}
+
+new MutationObserver(() => updateWeatherScene()).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+setInterval(updateWeatherScene, 5 * 60 * 1000);
+
 async function refreshWeather() {
   const w = settings.weather;
   if (!w) return;
   const unit = w.units === "celsius" ? "celsius" : "fahrenheit";
   const url = "https://api.open-meteo.com/v1/forecast?latitude=" + encodeURIComponent(w.latitude) +
     "&longitude=" + encodeURIComponent(w.longitude) +
-    "&current=temperature_2m,weather_code" +
-    "&daily=weather_code,temperature_2m_max,temperature_2m_min" +
+    "&current=temperature_2m,weather_code,is_day" +
+    "&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset" +
     "&temperature_unit=" + unit + "&timezone=auto&forecast_days=5";
   try {
     const data = await getJSON(url);
+    state.weatherData = data;
+    updateWeatherScene();
     const [desc, icon] = WEATHER_CODES[data.current.weather_code] || ["", "❓"];
     $("weather-place").textContent = w.name || "Weather";
     $("weather-icon").textContent = icon;

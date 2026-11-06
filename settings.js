@@ -93,6 +93,8 @@ function fillForm() {
   $("weatherLat").value = w.weather ? w.weather.latitude : "";
   $("weatherLon").value = w.weather ? w.weather.longitude : "";
   $("weatherUnits").value = (w.weather && w.weather.units) || "fahrenheit";
+  $("weatherScene").value = (w.weather && w.weather.scene) || "auto";
+  $("weatherAnimate").checked = !(w.weather && w.weather.animate === false);
 
   $("hideWhenEmpty").checked = !!(w.scores && w.scores.hideWhenEmpty);
 
@@ -137,7 +139,10 @@ function readForm() {
       name: $("weatherName").value.trim(),
       latitude: numberOr($("weatherLat").value, bw.latitude),
       longitude: numberOr($("weatherLon").value, bw.longitude),
-      units: $("weatherUnits").value
+      units: $("weatherUnits").value,
+      scene: $("weatherScene").value,
+      animate: $("weatherAnimate").checked,
+      refreshMinutes: bw.refreshMinutes
     },
     scores: {
       enabled: Object.assign({}, (base.scores || {}).enabled),

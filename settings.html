@@ -36,6 +36,17 @@
       <label class="row"><span>Place name</span><input id="weatherName" type="text"></label>
       <label class="row"><span>Latitude</span><input id="weatherLat" type="number" step="any"></label>
       <label class="row"><span>Longitude</span><input id="weatherLon" type="number" step="any"></label>
+      <label class="row"><span>Background</span>
+        <select id="weatherScene">
+          <option value="auto">Auto (city or small town by population)</option>
+          <option value="city">City skyline</option>
+          <option value="town">Small town</option>
+          <option value="lake">Lake and pines</option>
+          <option value="farm">Farmland</option>
+          <option value="none">None</option>
+        </select>
+      </label>
+      <label class="row check"><input id="weatherAnimate" type="checkbox"><span>Animate rain, snow and clouds</span></label>
       <label class="row"><span>Units</span>
         <select id="weatherUnits">
           <option value="fahrenheit">Fahrenheit</option>
