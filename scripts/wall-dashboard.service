@@ -8,6 +8,7 @@ Type=simple
 # Edit User and the path below to match the tablet.
 User=dashboard
 Environment=DISPLAY=:0
+EnvironmentFile=-/home/dashboard/wall-dashboard/scripts/kiosk.env
 ExecStart=/home/dashboard/wall-dashboard/scripts/kiosk.sh
 Restart=on-failure
 RestartSec=10

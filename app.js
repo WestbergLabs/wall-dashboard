@@ -201,6 +201,23 @@ async function refreshFantasy() {
   }
 }
 
+function controllerUrl(f) {
+  return (f.controllerUrl || "http://127.0.0.1:8081").replace(/\/$/, "");
+}
+
+function fantasyViaPage() {
+  const f = settings.fantasy || {};
+  return f.provider === "yahoo-page" && state.fantasyReady;
+}
+
+function callController(path) {
+  fetch(controllerUrl(settings.fantasy || {}) + path, { cache: "no-store" }).catch(() => {});
+}
+
+function isNight() {
+  return $("night").classList.contains("on");
+}
+
 async function loadFantasy() {
   const f = settings.fantasy;
   state.fantasyReady = false;
@@ -208,7 +225,15 @@ async function loadFantasy() {
   if (f.autoHideOffSeason && !inSeason(f.seasonStart, f.seasonEnd)) return;
 
   try {
-    if (f.provider === "yahoo") {
+    if (f.provider === "yahoo-page") {
+      // The kiosk's tab controller flips the browser to your signed-in Yahoo matchup page
+      // while this screen is up. The controller only answers on the kiosk, so on any other
+      // browser this screen stays out of the rotation.
+      const res = await fetch(controllerUrl(f) + "/health", { cache: "no-store" });
+      if (!res.ok) return;
+      $("fantasy-body").replaceChildren(el("div", "empty", "Opening your Yahoo matchup..."));
+      state.fantasyReady = true;
+    } else if (f.provider === "yahoo") {
       // Yahoo requires OAuth, so the dashboard reads a JSON file that a separate
       // job (script or MCP) writes. See README for the schema. No file = screen stays hidden.
       const data = await getJSON(f.yahooDataUrl || "data/yahoo-fantasy.json");
@@ -247,7 +272,7 @@ async function loadFantasy() {
     }
   } catch (err) {
     // A missing Yahoo file is expected until the feed exists, so only report other providers.
-    if (f.provider !== "yahoo") setStatus("fantasy: " + err.message);
+    if (f.provider === "sleeper") setStatus("fantasy: " + err.message);
   }
 }
 
@@ -266,9 +291,19 @@ function drawDots(list) {
 }
 
 function show(id) {
+  const previous = currentId;
   currentId = id;
   SCREEN_IDS.forEach((name) => $("screen-" + name).classList.toggle("active", name === id));
   drawDots(activeScreens());
+
+  if (fantasyViaPage()) {
+    if (id === "fantasy" && !isNight()) {
+      const reload = Number((settings.fantasy || {}).yahooReloadMinutes) || 60;
+      callController("/show?seconds=" + secondsFor("fantasy") + "&reload=" + reload);
+    } else if (previous === "fantasy") {
+      callController("/dashboard");
+    }
+  }
 }
 
 function step(direction) {
